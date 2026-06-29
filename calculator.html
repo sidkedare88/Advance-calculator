@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Futuristic Calculator X</title>
+
+<style>
+:root{--bg1:#071028;--bg2:#041022;--glass:rgba(255,255,255,0.06);--accent:#00ffd5;--accent-2:#4b6cff;--danger:#ff6b6b}
+*{box-sizing:border-box;font-family:Inter,Segoe UI,system-ui,Arial;background-attachment:fixed}
+body{min-height:100vh;margin:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(1200px 600px at 10% 10%,#081126,transparent),linear-gradient(135deg,var(--bg1),var(--bg2));color:#dbeafe}
+.wrap{display:flex;gap:20px;align-items:flex-start;padding:30px}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border-radius:16px;padding:18px;border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(8px);box-shadow:0 6px 30px rgba(11,15,27,0.6)}
+.calculator{width:380px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.title{font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 14px rgba(0,255,213,0.08)}
+.controls{display:flex;gap:8px}
+.btn{padding:8px 10px;border-radius:10px;border:none;background:rgba(255,255,255,0.03);color:inherit;cursor:pointer;outline:none}
+.display{width:100%;height:80px;border-radius:12px;padding:12px 18px;font-size:1.8rem;color:#e6f7ff;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);text-align:right;box-shadow:inset 0 -6px 30px rgba(75,108,255,0.02)}
+.main{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+button.key{height:62px;border-radius:12px;border:none;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));color:#e8f9ff;font-size:1.05rem;cursor:pointer;transition:transform .14s,box-shadow .14s}
+button.key:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(75,108,255,0.08)}
+.op{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021020;font-weight:700}
+.accent{background:linear-gradient(90deg,#ffd166,#ff6b6b);color:#081026}
+.zero{grid-column:span 2}
+.side{width:300px;display:flex;flex-direction:column;gap:12px}
+.history{max-height:420px;overflow:auto;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);border:1px solid rgba(255,255,255,0.03)}
+.history .row{padding:8px;border-radius:8px;margin-bottom:8px;background:linear-gradient(90deg,rgba(11,15,27,0.4),rgba(11,15,27,0.25));font-size:0.95rem}
+.small{font-size:0.82rem;color:rgba(255,255,255,0.7)}
+.theme-toggle{display:inline-flex;align-items:center;gap:8px}
+@media(max-width:900px){.wrap{flex-direction:column;align-items:center}.side{width:100%}.calculator{width:320px}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="panel calculator">
+        <div class="topbar">
+            <div class="title">CALCULATOR X</div>
+            <div class="controls">
+                <button class="btn" id="themeBtn">Theme</button>
+                <button class="btn" id="clearAll">AC</button>
+            </div>
+        </div>
+
+        <input id="display" class="display" readonly aria-label="Calculator display">
+
+        <div class="main" id="buttons">
+            <button class="key accent" data-action="mc">MC</button>
+            <button class="key" data-action="mr">MR</button>
+            <button class="key" data-action="mplus">M+</button>
+            <button class="key" data-action="mminus">M-</button>
+
+            <button class="key" data-value="sin(">sin</button>
+            <button class="key" data-value="cos(">cos</button>
+            <button class="key" data-value="tan(">tan</button>
+            <button class="key op" data-value="/">÷</button>
+
+            <button class="key" data-value="7">7</button>
+            <button class="key" data-value="8">8</button>
+            <button class="key" data-value="9">9</button>
+            <button class="key op" data-value="*">×</button>
+
+            <button class="key" data-value="4">4</button>
+            <button class="key" data-value="5">5</button>
+            <button class="key" data-value="6">6</button>
+            <button class="key op" data-value="-">−</button>
+
+            <button class="key" data-value="1">1</button>
+            <button class="key" data-value="2">2</button>
+            <button class="key" data-value="3">3</button>
+            <button class="key op" data-value="+">+</button>
+
+            <button class="key zero" data-value="0">0</button>
+            <button class="key" data-value=".">.</button>
+            <button class="key" data-action="percent">%</button>
+            <button class="key op" data-action="calc">=</button>
+
+            <button class="key" data-value="(">(</button>
+            <button class="key" data-value=")">)</button>
+            <button class="key" data-action="sqrt">√</button>
+            <button class="key" data-action="pow">^</button>
+        </div>
+    </div>
+
+    <div class="panel side">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="small">History</div>
+            <div style="display:flex;gap:8px">
+                <button class="btn" id="copyLast">Copy</button>
+                <button class="btn" id="clearHistory">Clear</button>
+            </div>
+        </div>
+        <div class="history" id="history"></div>
+        <div class="small">Memory: <span id="memValue">0</span></div>
+    </div>
+</div>
+
+<script>
+const display = document.getElementById('display');
+const buttons = document.getElementById('buttons');
+const historyEl = document.getElementById('history');
+const memValueEl = document.getElementById('memValue');
+
+let memory = parseFloat(localStorage.getItem('calc_memory')||'0');
+let history = JSON.parse(localStorage.getItem('calc_history')||'[]');
+memValueEl.textContent = memory;
+
+function refreshHistory(){
+    historyEl.innerHTML = '';
+    history.slice().reverse().forEach(h => {
+        const r = document.createElement('div'); r.className='row'; r.textContent = h; historyEl.appendChild(r);
+    });
+}
+refreshHistory();
+
+buttons.addEventListener('click', (e)=>{
+    const btn = e.target.closest('button'); if(!btn) return;
+    const val = btn.getAttribute('data-value');
+    const action = btn.getAttribute('data-action');
+
+    if(val) appendValue(val);
+    else if(action) handleAction(action);
+});
+
+function appendValue(v){ display.value = (display.value||'') + v; }
+function clearAll(){ display.value = ''; }
+function backspace(){ display.value = display.value.slice(0,-1); }
+
+function handleAction(act){
+    if(act==='calc') calculate();
+    else if(act==='percent') { try{ display.value = String(evaluateExpression(display.value + '%')); }catch{ display.value='Error' } }
+    else if(act==='sqrt') appendValue('sqrt(');
+    else if(act==='pow') appendValue('^');
+    else if(act==='mc'){ memory = 0; localStorage.setItem('calc_memory', String(memory)); memValueEl.textContent = memory; }
+    else if(act==='mr'){ appendValue(String(memory)); }
+    else if(act==='mplus'){ try{ memory = +(memory + evaluateExpression(display.value)); localStorage.setItem('calc_memory', String(memory)); memValueEl.textContent = memory; }catch{}}
+    else if(act==='mminus'){ try{ memory = +(memory - evaluateExpression(display.value)); localStorage.setItem('calc_memory', String(memory)); memValueEl.textContent = memory; }catch{}}
+}
+
+function evaluateExpression(expr){
+    if(!expr) return 0;
+    expr = expr.replace(/×|\u00D7/g,'*').replace(/÷|\u00F7/g,'/').replace(/−/g,'-').replace(/\^/g,'**');
+    expr = expr.replace(/\%/g, '/100');
+    const map = { 'sin':'Math.sin','cos':'Math.cos','tan':'Math.tan','sqrt':'Math.sqrt','abs':'Math.abs','ln':'Math.log','log':'Math.log10','exp':'Math.exp','pow':'Math.pow' };
+    expr = expr.replace(/\b(pi)\b/gi, String(Math.PI));
+    expr = expr.replace(/\b(e)\b/gi, String(Math.E));
+    expr = expr.replace(/\b(sin|cos|tan|sqrt|abs|ln|log|exp|pow)\b/gi, m => map[m.toLowerCase()]);
+
+    try{
+        return Function('return ('+expr+')')();
+    }catch(err){ throw err }
+}
+
+function calculate(){
+    try{
+        const res = evaluateExpression(display.value);
+        const row = (display.value||'') + ' = ' + res;
+        history.push(row); localStorage.setItem('calc_history', JSON.stringify(history)); refreshHistory();
+        display.value = String(res);
+    }catch{ display.value='Error' }
+}
+
+document.getElementById('clearAll').addEventListener('click', ()=>{ clearAll(); history=[]; localStorage.removeItem('calc_history'); refreshHistory(); });
+document.getElementById('clearHistory').addEventListener('click', ()=>{ history=[]; localStorage.removeItem('calc_history'); refreshHistory(); });
+document.getElementById('copyLast').addEventListener('click', ()=>{ if(history.length){ navigator.clipboard.writeText(history[history.length-1]); } });
+document.getElementById('themeBtn').addEventListener('click', ()=>{ document.body.classList.toggle('alt-theme'); document.body.style.background = document.body.classList.contains('alt-theme')? 'linear-gradient(135deg,#081126,#0b1020)' : 'radial-gradient(1200px 600px at 10% 10%,#081126,transparent),linear-gradient(135deg,var(--bg1),var(--bg2))'; });
+
+document.addEventListener('keydown',(e)=>{
+    const k = e.key;
+    if(/^[0-9]$/.test(k) || '+-*/().'.includes(k)) appendValue(k);
+    else if(k==='Enter') calculate();
+    else if(k==='Backspace') backspace();
+    else if(k==='Escape') clearAll();
+    else if(k==='%') appendValue('%');
+    else if(k==='^') appendValue('^');
+});
+
+refreshHistory(); memValueEl.textContent = memory;
+</script>
+
+</body>
+</html>
